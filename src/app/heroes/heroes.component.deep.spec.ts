@@ -5,19 +5,12 @@ import { HeroService } from "../hero.service";
 import { of } from "rxjs/observable/of";
 import { Hero } from "../hero";
 import { By } from "@angular/platform-browser";
+import { HeroComponent } from "../hero/hero.component";
 
 describe('HeroesComponent (shallow tests)', () => {
   let fixture: ComponentFixture<HeroesComponent>;
   let mockHeroService;
   let heroes;
-
-  @Component({
-    selector: 'app-hero',
-    template: '<div></div>'
-  })
-  class FakeHeroComponent {
-    @Input() hero: Hero;
-  }
 
   beforeEach(() => {
     heroes = [
@@ -30,26 +23,27 @@ describe('HeroesComponent (shallow tests)', () => {
     TestBed.configureTestingModule({
       declarations: [
         HeroesComponent,
-        FakeHeroComponent
+        HeroComponent
       ],
       providers: [
         { provide: HeroService, useValue: mockHeroService }
-      ]
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     });
     fixture = TestBed.createComponent(HeroesComponent);
   });
 
-  it('Should set heroes correctly from the service', () => {
+  it('Shou(ld render each hero as a HeroComponent', () => {
     mockHeroService.getHeroes.and.returnValue(of(heroes));
+
+    // run ngOnInit
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.heroes.length).toBe(3);
+    const heroComponentDEs = fixture.debugElement.queryAll(By.directive(HeroComponent));
+    expect(heroComponentDEs.length).toEqual(3);
+    for (let i = 0; i < heroComponentDEs.length; i++) {
+      expect(heroComponentDEs[i].componentInstance.hero).toEqual(heroes[i]);
+    }
   });
 
-  it('Should create one li for each hero', () => {
-    mockHeroService.getHeroes.and.returnValue(of(heroes));
-    fixture.detectChanges();
-
-    expect(fixture.debugElement.queryAll(By.css('.heroes li')).length).toBe(3);
-  });
 });
